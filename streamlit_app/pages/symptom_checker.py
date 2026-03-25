@@ -11,6 +11,13 @@ inject_css()
 
 ANIMAL_ICONS = {"dog": "🐕", "cat": "🐈", "livestock": "🐄"}
 
+# ── Animal-specific images ────────────────────────────────────────────────
+ANIMAL_IMAGES = {
+    "dog":       "puppy.png",
+    "cat":       "kitten.jpg",
+    "livestock": "livestock.png",
+}
+
 page_header("🩺 Symptom Checker", "Select all symptoms your animal is currently showing.")
 
 # ── Guard: animal must be chosen first ───────────────────────────────────
@@ -24,6 +31,13 @@ st.markdown(
     f"<p>Checking for: <strong>{icon} {animal.capitalize()}</strong></p>",
     unsafe_allow_html=True,
 )
+
+# ── Animal image ──────────────────────────────────────────────────────────
+img_file = ANIMAL_IMAGES.get(animal)
+if img_file:
+    img_path = os.path.join(os.path.dirname(__file__), "..", "assets", img_file)
+    if os.path.exists(img_path):
+        st.image(img_path, use_container_width=True)
 
 # ── Fetch symptom list ────────────────────────────────────────────────────
 if not health_check():

@@ -110,6 +110,10 @@ if entered:
         with st.expander("Your additional notes"):
             st.write(notes)
 
+# ── Results image ─────────────────────────────────────────────────────────
+img_path = os.path.join(os.path.dirname(__file__), "..", "assets", "vet.png")
+st.image(img_path, use_container_width=True)
+
 # ── Re-check button ───────────────────────────────────────────────────────
 st.markdown("---")
 if st.button("🔄 Start a new assessment", use_container_width=True):
