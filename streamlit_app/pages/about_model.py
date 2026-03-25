@@ -21,7 +21,7 @@ except Exception as e:
     st.error(f"Could not load metadata: {e}")
     st.stop()
 
-ICONS = {"dog": "🐕", "cat": "🐈", "livestock": "🐄"}
+ICONS = {"dog": "", "cat": "🐈", "livestock": "🐄"}
 
 for animal, meta in metadata.items():
     icon = ICONS.get(animal, "🐾")

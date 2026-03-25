@@ -27,10 +27,10 @@ st.markdown(f"<p style='margin-top:-1rem;font-size:0.85rem'>{status_html}</p>", 
 st.markdown("### How it works")
 col1, col2, col3, col4 = st.columns(4)
 steps = [
-    ("1️⃣", "Choose animal", "Select dog, cat, or livestock."),
-    ("2️⃣", "Enter symptoms", "Pick from a searchable list."),
-    ("3️⃣", "Get assessment", "See likely conditions and urgency."),
-    ("4️⃣", "Next steps", "Follow up with your vet."),
+    ("✔", "Choose animal", "Select dog, cat, or livestock."),
+    ("✔", "Enter symptoms", "Pick from a searchable list."),
+    ("🏁", "Get assessment", "See likely conditions and urgency."),
+    ("👩‍⚕️", "Next steps", "Follow up with your vet."),
 ]
 for col, (icon, title, desc) in zip([col1, col2, col3, col4], steps):
     with col:
