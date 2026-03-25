@@ -1,0 +1,54 @@
+# ── Python ────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# ── Virtual environment ───────────────────────────────────────────────────
+.venv/
+venv/
+env/
+
+# ── Secrets & environment variables ──────────────────────────────────────
+.env
+.env.*
+*.env
+secrets.toml
+.streamlit/secrets.toml
+
+# ── ML model files (add to git only intentionally) ────────────────────────
+*.joblib
+*.pkl
+*.pickle
+*.h5
+*.pt
+*.pth
+*.onnx
+
+# ── Data files ────────────────────────────────────────────────────────────
+*.csv
+*.tsv
+*.parquet
+*.feather
+data/
+
+# ── Jupyter ───────────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb
+
+# ── macOS ─────────────────────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverrideIcon
+
+# ── IDEs ──────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ── Build / dist ──────────────────────────────────────────────────────────
+dist/
+build/
+*.egg-info/
