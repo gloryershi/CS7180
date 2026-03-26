@@ -69,7 +69,7 @@ st.markdown(
 # ── Matched symptoms ──────────────────────────────────────────────────────
 matched = result.get("matched_symptoms", [])
 if matched:
-    st.markdown("#### ✅ Symptoms that matched this condition")
+    st.markdown("#### 🐾 Symptoms that matched this condition")
     st.markdown(
         "<div class='card'>" +
         "".join(f'<span style="display:inline-block;background:#D1FAE5;color:#065F46;'
@@ -89,7 +89,7 @@ if red_flags:
     )
 
 # ── Next steps ────────────────────────────────────────────────────────────
-st.markdown("#### 📌 Recommended next steps")
+st.markdown("#### 🐾 Recommended next steps")
 next_steps = result.get("next_steps", [])
 for step in next_steps:
     st.markdown(
