@@ -50,17 +50,21 @@ except Exception as e:
     st.error(f"Could not load symptoms: {e}")
     st.stop()
 
+# ── Symptom search (outside form so it triggers live reruns) ──────────────
+st.markdown("#### Search and select symptoms")
+search = st.text_input("🔍 Filter symptoms (optional)", placeholder="e.g. vomiting, fever …")
+filtered = [s for s in all_symptoms if search.lower() in s.lower()] if search else all_symptoms
+
+# Keep previously selected symptoms in the options even if they don't match the search
+current_selection = st.session_state.get("symptoms", [])
+options = list(dict.fromkeys(current_selection + filtered))
+
 # ── Symptom form ──────────────────────────────────────────────────────────
 with st.form("symptom_form"):
-    st.markdown("#### Search and select symptoms")
-
-    search = st.text_input("🔍 Filter symptoms", placeholder="e.g. vomiting, fever …")
-    filtered = [s for s in all_symptoms if search.lower() in s.lower()] if search else all_symptoms
-
     selected = st.multiselect(
         "Symptoms observed",
-        options=filtered,
-        default=[s for s in st.session_state.get("symptoms", []) if s in filtered],
+        options=options,
+        default=[s for s in current_selection if s in options],
         help="Select all that apply. You can type to search.",
     )
 
