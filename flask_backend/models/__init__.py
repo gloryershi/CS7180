@@ -35,11 +35,8 @@ SYMPTOMS = {
         "Skin rash", "Weight loss", "Pale gums", "Difficulty breathing",
     ],
     "cat": [
-        "Sneezing", "Eye discharge", "Nasal discharge", "Vomiting", "Diarrhea",
-        "Lethargy", "Loss of appetite", "Itching", "Hair loss",
-        "Straining to urinate", "Blood in urine", "Weight loss",
-        "Excessive thirst", "Coughing", "Wheezing", "Hiding behavior",
-        "Pale gums", "Difficulty breathing",
+        "Appetite_Loss", "Vomiting", "Diarrhea", "Coughing", "Labored_Breathing",
+        "Lameness", "Skin_Lesions", "Nasal_Discharge","Eye_Discharge",
     ],
     "livestock": [
         "Fever", "Reduced milk production", "Limping", "Foot lesions",
