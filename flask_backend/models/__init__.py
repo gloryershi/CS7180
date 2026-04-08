@@ -26,6 +26,8 @@ _CAT_MODEL_PATH = _MODELS_DIR / "cat_model.joblib"
 
 _LIVESTOCK_MODEL_PATH = _MODELS_DIR / "livestock_model.joblib"
 _LIVESTOCK_LE_PATH    = _MODELS_DIR / "livestock_label_encoder.joblib"
+_DOG_MODEL_PATH = _MODELS_DIR / "dog-lr-model.joblib"
+_DOG_FEATURES_PATH = _MODELS_DIR / "feature_names.joblib"
 
 def _try_load_livestock() -> tuple:
     """Returns (model, label_encoder) or (None, None) if files missing."""
@@ -39,6 +41,21 @@ def _try_load_livestock() -> tuple:
         return None, None
 
 LIVESTOCK_CLASSIFIER, LIVESTOCK_LABEL_ENCODER = _try_load_livestock()
+
+
+def _try_load_dog() -> tuple:
+    """Returns (model, feature_names) or (None, None) if files missing."""
+    if not _DOG_MODEL_PATH.is_file():
+        return None, None
+    try:
+        mdl = joblib.load(_DOG_MODEL_PATH)
+        features = joblib.load(_DOG_FEATURES_PATH) if _DOG_FEATURES_PATH.is_file() else None
+        return mdl, features
+    except Exception:
+        return None, None
+
+
+DOG_CLASSIFIER, DOG_FEATURE_NAMES = _try_load_dog()
 
 _LIVESTOCK_SYMPTOM_COLS = [
     "blisters on gums", "blisters on hooves", "blisters on mouth",
@@ -54,15 +71,169 @@ _LIVESTOCK_ANIMAL_COLS = [
     "Animal_buffalo", "Animal_cow", "Animal_goat", "Animal_sheep",
 ]
 
+_DOG_URGENCY_MAP = {
+    "parvovirus": "high",
+    "distemper": "high",
+    "hepatitis": "high",
+    "tetanus": "high",
+    "tick fever": "high",
+    "chronic kidney disease": "medium",
+    "diabetes": "medium",
+    "gastrointestinal disease": "medium",
+    "cancers": "medium",
+    "allergies": "low",
+    "gingitivis": "low",
+    "skin rashes": "low",
+}
+
+_DOG_DISEASE_INFO = {
+    "tick fever": {
+        "description": "Tick fever is a bacterial infection transmitted by ticks that can affect blood and organs.",
+        "next_steps": [
+            "Take your dog to the vet immediately",
+            "Check and remove ticks from your dog",
+            "Keep your dog's environment clean",
+            "Consider tick prevention products",
+        ],
+        "red_flags": ["High fever", "Neurological symptoms", "Severe anemia"],
+    },
+    "distemper": {
+        "description": "Canine distemper is a serious viral disease affecting respiratory, digestive, and nervous systems.",
+        "next_steps": [
+            "Seek emergency veterinary care",
+            "Isolate the sick dog",
+            "Provide supportive care",
+            "Ensure other dogs' vaccinations are up to date",
+        ],
+        "red_flags": ["Seizures", "Paralysis", "Persistent high fever"],
+    },
+    "parvovirus": {
+        "description": "Parvovirus is a highly contagious virus primarily affecting the digestive system.",
+        "next_steps": [
+            "Emergency veterinary care required",
+            "Isolate the sick dog",
+            "Monitor hydration to prevent dehydration",
+            "Thoroughly disinfect the environment",
+        ],
+        "red_flags": ["Severe dehydration", "Bloody diarrhea", "Signs of shock"],
+    },
+    "hepatitis": {
+        "description": "Canine hepatitis is a viral disease affecting the liver.",
+        "next_steps": [
+            "Seek veterinary care promptly",
+            "Provide supportive care",
+            "Monitor liver function",
+            "Ensure adequate hydration",
+        ],
+        "red_flags": ["Jaundice", "Abdominal swelling", "Bleeding tendency"],
+    },
+    "tetanus": {
+        "description": "Tetanus is a serious infection caused by bacterial toxins affecting the nervous system.",
+        "next_steps": [
+            "Emergency veterinary care required",
+            "Check for wounds",
+            "Keep environment quiet and dark",
+            "Avoid stimulation",
+        ],
+        "red_flags": ["Full body muscle stiffness", "Breathing difficulty", "Difficulty swallowing"],
+    },
+    "chronic kidney disease": {
+        "description": "Chronic kidney disease involves gradual decline in kidney function.",
+        "next_steps": [
+            "Schedule veterinary examination",
+            "Consider special kidney diet",
+            "Ensure adequate hydration",
+            "Regular monitoring of kidney function indicators",
+        ],
+        "red_flags": ["Severe dehydration", "Frequent vomiting", "Weakness"],
+    },
+    "diabetes": {
+        "description": "Diabetes affects the body's ability to regulate blood sugar.",
+        "next_steps": [
+            "Get blood sugar testing",
+            "Discuss insulin treatment options",
+            "Control diet",
+            "Regular blood sugar monitoring",
+        ],
+        "red_flags": ["Diabetic ketoacidosis symptoms", "Severe weakness", "Coma"],
+    },
+    "gastrointestinal disease": {
+        "description": "Gastrointestinal disease affects the digestive system.",
+        "next_steps": [
+            "Schedule veterinary examination",
+            "May need temporary fasting",
+            "Gradually resume bland diet",
+            "Monitor symptom changes",
+        ],
+        "red_flags": ["Bloody vomit or diarrhea", "Severe dehydration", "Severe abdominal pain"],
+    },
+    "allergies": {
+        "description": "Allergic reactions may be caused by food, environmental factors, or contact allergens.",
+        "next_steps": [
+            "Schedule veterinary examination",
+            "Try to identify allergens",
+            "Consider allergy testing",
+            "Discuss anti-allergy treatment options",
+        ],
+        "red_flags": ["Breathing difficulty", "Facial swelling", "Severe skin infection"],
+    },
+    "gingitivis": {
+        "description": "Gingivitis is inflammation of the gums, usually caused by plaque accumulation.",
+        "next_steps": [
+            "Schedule dental examination",
+            "Consider professional cleaning",
+            "Establish daily oral care routine",
+            "Use dental care products",
+        ],
+        "red_flags": ["Severe bad breath", "Loose teeth", "Unable to eat"],
+    },
+    "cancers": {
+        "description": "Cancer involves abnormal cell growth and requires professional diagnosis.",
+        "next_steps": [
+            "Schedule comprehensive examination",
+            "May need biopsy",
+            "Discuss treatment options",
+            "Consider oncology specialist consultation",
+        ],
+        "red_flags": ["Rapidly growing lumps", "Bleeding", "Severe weight loss"],
+    },
+    "skin rashes": {
+        "description": "Skin problems may be caused by infection, allergies, or parasites.",
+        "next_steps": [
+            "Schedule skin examination",
+            "Avoid excessive scratching",
+            "Keep skin clean and dry",
+            "May need skin scraping test",
+        ],
+        "red_flags": ["Large area infection", "Severe hair loss", "Skin ulceration"],
+    },
+}
+
 # ---------------------------------------------------------------------------
 # Shared symptom lists (replace / extend with your real feature vocabulary)
 # ---------------------------------------------------------------------------
 SYMPTOMS = {
-    "dog": [
-        "Fever", "Vomiting", "Diarrhea", "Lethargy", "Loss of appetite",
-        "Itching", "Hair loss", "Coughing", "Limping", "Excessive thirst",
-        "Bloating", "Seizures", "Eye discharge", "Nasal discharge",
-        "Skin rash", "Weight loss", "Pale gums", "Difficulty breathing",
+    "dog": DOG_FEATURE_NAMES if DOG_FEATURE_NAMES else [
+        "fever", "nasal discharge", "loss of appetite", "weight loss", "lameness",
+        "breathing difficulty", "swollen lymph nodes", "lethargy", "depression",
+        "coughing", "diarrhea", "seizures", "vomiting", "eating less than usual",
+        "excessive salivation", "redness around eye area", "severe dehydration",
+        "pain", "discomfort", "sepsis", "weightloss", "tender abdomen",
+        "increased drinking and urination", "bloated stomach", "yellow gums",
+        "constipation", "paralysis", "wrinkled forehead",
+        "continuously erect and stiff ears", "grinning appearance",
+        "stiff and hard tail", "stiffness of muscles", "acute blindness",
+        "blood in urine", "hunger", "cataracts", "losing sight", "glucose in urine",
+        "burping", "blood in stools", "passing gases", "eating grass", "scratching",
+        "licking", "itchy skin", "redness of skin", "face rubbing", "loss of fur",
+        "swelling of gum", "redness of gum", "receding gum", "bleeding of gum",
+        "plaque", "bad breath", "tartar", "lumps", "swelling", "red bumps", "scabs",
+        "irritation", "dry skin", "fur loss", "red patches", "heart complication",
+        "weakness", "aggression", "pale gums", "coma", "collapse", "abdominal pain",
+        "difficulty urinating", "dandruff", "anorexia", "blindness", "excess jaw tone",
+        "urine infection", "lack of energy", "smelly", "neurological disorders",
+        "eye discharge", "loss of consciousness", "enlarged liver", "purging",
+        "bloody discharge", "wounds",
     ],
     "cat": [
         "Appetite_Loss", "Vomiting", "Diarrhea", "Coughing", "Labored_Breathing",
@@ -390,7 +561,84 @@ def _placeholder_result(animal: str, symptoms: list[str]) -> dict:
 # Public prediction functions — swap bodies when real models are ready
 # ---------------------------------------------------------------------------
 def predict_dog(symptoms: list[str]) -> dict:
-    return _placeholder_result("dog", symptoms)
+    # Predict dog disease using the trained Logistic Regression model.
+    if DOG_CLASSIFIER is None or DOG_FEATURE_NAMES is None:
+        return _placeholder_result("dog", symptoms)
+
+    try:
+        normalized = [s.strip().lower() for s in symptoms]
+        feature_vector = np.zeros(len(DOG_FEATURE_NAMES))
+        matched_symptoms = []
+
+        for symptom in normalized:
+            if symptom in DOG_FEATURE_NAMES:
+                idx = DOG_FEATURE_NAMES.index(symptom)
+                feature_vector[idx] = 1
+                matched_symptoms.append(symptom)
+
+        if not matched_symptoms:
+            return {
+                "animal": "dog",
+                "condition": None,
+                "confidence": 0.0,
+                "urgency": None,
+                "why": "No known symptoms matched. Please check the symptom names.",
+                "next_steps": [
+                    "Please use standard symptom names and try again",
+                    "Or consult a veterinarian directly",
+                ],
+                "matched_symptoms": [],
+                "unmatched_symptoms": normalized,
+                "red_flags": [],
+                "model_version": "dog-lr-model.joblib",
+                "is_placeholder": False,
+            }
+
+        prediction = DOG_CLASSIFIER.predict([feature_vector])[0]
+        probabilities = DOG_CLASSIFIER.predict_proba([feature_vector])[0]
+        confidence = float(max(probabilities))
+
+        top_indices = np.argsort(probabilities)[::-1]
+        top_predictions = [
+            {
+                "disease": DOG_CLASSIFIER.classes_[i],
+                "probability": round(float(probabilities[i]), 4),
+            }
+            for i in top_indices
+            if probabilities[i] > 0.01
+        ]
+
+        disease_info = _DOG_DISEASE_INFO.get(prediction, {})
+        return {
+            "animal": "dog",
+            "condition": prediction,
+            "confidence": round(confidence, 4),
+            "urgency": _DOG_URGENCY_MAP.get(prediction, "medium"),
+            "why": disease_info.get("description", f"Prediction based on symptoms: {matched_symptoms}"),
+            "next_steps": disease_info.get("next_steps", ["Consult a professional veterinarian"]),
+            "matched_symptoms": matched_symptoms,
+            "unmatched_symptoms": [s for s in normalized if s not in matched_symptoms],
+            "red_flags": disease_info.get("red_flags", []),
+            "top_predictions": top_predictions,
+            "model_version": "dog-lr-model.joblib",
+            "is_placeholder": False,
+        }
+    except Exception as exc:
+        return {
+            "animal": "dog",
+            "condition": "Prediction unavailable",
+            "confidence": 0.0,
+            "urgency": "medium",
+            "why": f"Model error: {exc}",
+            "next_steps": [
+                "Ensure `dog-lr-model.joblib` and `feature_names.joblib` are present.",
+                "Consult a licensed veterinarian for a proper diagnosis.",
+            ],
+            "matched_symptoms": symptoms,
+            "red_flags": [],
+            "model_version": "error",
+            "is_placeholder": True,
+        }
 
 
 def predict_cat(symptoms: list[str]) -> dict:
@@ -476,14 +724,23 @@ def _cat_training_status() -> str:
     return f"Label encoder ready ({n} disease classes); add cat_model.joblib for predictions"
 
 
+def _dog_training_status() -> str:
+    if DOG_CLASSIFIER is not None and DOG_FEATURE_NAMES is not None:
+        return f"Classifier loaded (dog-lr-model.joblib) with {len(DOG_FEATURE_NAMES)} features"
+    return "Awaiting dog-lr-model.joblib and feature_names.joblib"
+
+
 MODEL_METADATA = {
     "dog": {
         "name": "Canine Disease Classifier",
-        "version": "0.0.0-placeholder",
-        "status": "placeholder",
-        "training_status": "Awaiting real training data",
-        "last_updated": "—",
-        "accuracy": "N/A",
+        "version": "dog-lr-model.joblib" if DOG_CLASSIFIER is not None else "0.0.0-placeholder",
+        "status": "active" if DOG_CLASSIFIER is not None else "placeholder",
+        "training_status": _dog_training_status(),
+        "last_updated": "2025-04",
+        "accuracy": "99.8%" if DOG_CLASSIFIER is not None else "N/A",
+        "algorithm": "Logistic Regression" if DOG_CLASSIFIER is not None else "N/A",
+        "features_count": len(DOG_FEATURE_NAMES) if DOG_FEATURE_NAMES else 0,
+        "diseases": list(DOG_CLASSIFIER.classes_) if DOG_CLASSIFIER is not None else [],
     },
     "cat": {
         "name": "Feline Disease Classifier",
