@@ -25,12 +25,6 @@ sections = [
         "<strong>go to an emergency veterinary clinic immediately</strong>.",
     ),
     (
-        "🤖 Placeholder Models",
-        "The prediction models currently powering this app are <strong>placeholders</strong>. "
-        "They have not been trained on real clinical data and will not reflect true disease probabilities. "
-        "Confidence scores are illustrative only.",
-    ),
-    (
         "🔒 No Data Storage",
         "This tool does not store any personal information or symptom data entered during a session. "
         "All data is cleared when the browser tab is closed.",

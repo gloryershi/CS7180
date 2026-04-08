@@ -276,6 +276,33 @@ def _resolve_cat_condition(pred: Any) -> str:
     return str(pred)
 
 
+_HIGH_URGENCY_KEYWORDS = frozenset({
+    "labored breathing", "respiratory distress", "difficulty breathing",
+    "pale gums", "seizure", "collapse", "poisoning", "urinary blockage",
+    "cardiac", "heart failure", "flutd",
+})
+_HIGH_URGENCY_SYMPTOMS = frozenset({
+    "labored_breathing", "difficulty breathing", "wheezing", "pale gums",
+})
+_LOW_URGENCY_KEYWORDS = frozenset({
+    "minor", "mild", "sneezing",
+})
+
+
+def _cat_urgency(condition: str, symptoms: list[str], confidence: float) -> str:
+    cond_lower = condition.lower()
+    if any(kw in cond_lower for kw in _HIGH_URGENCY_KEYWORDS):
+        return "high"
+    sym_lower = {s.strip().lower() for s in symptoms}
+    if sym_lower & _HIGH_URGENCY_SYMPTOMS:
+        return "high"
+    if any(kw in cond_lower for kw in _LOW_URGENCY_KEYWORDS):
+        return "low"
+    if confidence < 0.4:
+        return "low"
+    return "medium"
+
+
 def _cat_model_result(symptoms: list[str]) -> dict:
     if CAT_CLASSIFIER is None:
         raise RuntimeError("Cat classifier not loaded")
@@ -295,7 +322,7 @@ def _cat_model_result(symptoms: list[str]) -> dict:
         "animal": "cat",
         "condition": condition,
         "confidence": round(confidence, 2),
-        "urgency": "medium",
+        "urgency": _cat_urgency(condition, symptoms, confidence),
         "why": f"Predicted from your selected symptoms using the trained feline classifier (top class).",
         "next_steps": [
             "Consult a licensed veterinarian to confirm any concern.",

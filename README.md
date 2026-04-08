@@ -53,38 +53,6 @@ streamlit run streamlit_app/app.py
 
 ---
 
-## Swapping in Real Models
-
-Edit `flask_backend/models/__init__.py`.  
-Replace the `_placeholder_result()` call in each function with your trained model:
-
-```python
-import joblib
-
-_dog_model = joblib.load("flask_backend/models/dog_model.joblib")
-
-def predict_dog(symptoms: list[str]) -> dict:
-    features = vectorize(symptoms)          # your vectoriser
-    label    = _dog_model.predict([features])[0]
-    prob     = _dog_model.predict_proba([features])[0].max()
-    return {
-        "animal":     "dog",
-        "condition":  label,
-        "confidence": round(float(prob), 2),
-        "urgency":    map_urgency(label),   # your urgency mapping
-        "why":        "...",
-        "next_steps": [...],
-        "matched_symptoms": symptoms,
-        "red_flags":  [...],
-        "model_version": "1.0.0",
-        "is_placeholder": False,
-    }
-```
-
-Update `MODEL_METADATA` in the same file with real version info and accuracy.
-
----
-
 ## API Endpoints
 
 | Method | Path | Description |
