@@ -1,18 +1,3 @@
-"""
-Placeholder model functions for each animal type.
-The cat pipeline loads `cat_label_encoder.joblib` (sklearn LabelEncoder) from this package;
-wire `predict_cat` to your classifier and use `decode_cat_labels` on predicted indices.
-
-Example swap-in for dog:
-    import joblib
-    _model = joblib.load("dog_model.joblib")
-    def predict_dog(symptoms):
-        features = vectorize(symptoms)
-        label = _model.predict([features])[0]
-        prob  = _model.predict_proba([features])[0].max()
-        return build_result("dog", label, prob)
-"""
-
 import random
 from pathlib import Path
 from typing import Any, Optional
