@@ -88,11 +88,23 @@ def _add_symptom(symptom: str) -> None:
 
 def _common_symptoms_for(selected_animal: str, symptoms: list[str]) -> list[str]:
     preferred = {
-        "dog": ["Vomiting", "Diarrhea", "Lethargy", "Loss of appetite", "Coughing", "Itching"],
-        "cat": ["Vomiting", "Diarrhea", "Lethargy", "Loss of appetite", "Sneezing", "Eye discharge"],
-        "livestock": ["Fever", "Limping", "Bloating", "Loss of appetite", "Diarrhea", "Coughing"],
+        "dog": ["Blood in Urine", "Excessive Salivation", "Loss of Appetite", "Weight Loss", "Licking", "Burping"],
+        "cat": ["Appetite_Loss", "Vomiting", "Diarrhea", "Labored_Breathing", "Coughing"],
+        "livestock": [
+            "Blisters On Gums",
+            "Blisters On Hooves",
+            "Blisters On Mouth",
+            "Blisters On Tongue",
+            "Chest Discomfort",
+            "Chills",
+        ],
     }
-    chosen = [s for s in preferred.get(selected_animal, []) if s in symptoms]
+    symptom_lookup = {s.strip().lower(): s for s in symptoms}
+    chosen = [
+        symptom_lookup[s.strip().lower()]
+        for s in preferred.get(selected_animal, [])
+        if s.strip().lower() in symptom_lookup
+    ]
     return chosen if chosen else symptoms[:6]
 
 
@@ -122,9 +134,10 @@ st.markdown("<p class='chip-note'>Quick-add options:</p>", unsafe_allow_html=Tru
 common_symptoms = _common_symptoms_for(animal, all_symptoms)
 chip_cols = st.columns(3)
 for i, sym in enumerate(common_symptoms):
+    chip_label = sym.title() if animal == "dog" else sym
     with chip_cols[i % 3]:
         if st.button(
-            f"+ {sym}",
+            f"+ {chip_label}",
             key=f"quick_{animal}_{sym}",
             use_container_width=True,
             disabled=sym in st.session_state.symptoms,
