@@ -26,7 +26,7 @@ is_ph   = result.get("is_placeholder", True)
 
 # ── Top summary card ──────────────────────────────────────────────────────
 urg_color = URGENCY_COLOR.get(urgency, "#52B788")
-urg_label = URGENCY_LABEL.get(urgency, urgency.capitalize())
+urg_label = URGENCY_LABEL.get(urgency, urgency.capitalize() if urgency else "Unknown")
 pill_html = (
     '<span class="pill-placeholder">⚠ Placeholder model</span>'
     if is_ph else
@@ -59,9 +59,9 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# ── Top predictions (differential diagnosis) ─────────────────────────────
+# ── Top predictions For cats(differential diagnosis) ─────────────────────────────
 top_predictions = result.get("top_predictions", [])
-if top_predictions:
+if top_predictions and animal == "cat":
     st.markdown("#### 🔬 All possible conditions (ranked by confidence)")
     st.markdown(
         '<div class="card">',
@@ -85,6 +85,28 @@ if top_predictions:
             f'</div>'
         )
     st.markdown(rows_html + "</div>", unsafe_allow_html=True)
+
+# ── Top predictions for dogs ──────────────────────────────────────────────
+if top_predictions and animal == "dog" and len(top_predictions) > 1:
+    st.markdown("#### 📊 Other possible conditions")
+
+    for i, pred in enumerate(top_predictions):
+        disease = pred.get("disease", "—").replace("_", " ").title()
+        prob = pred.get("probability", 0)
+        prob_pct = int(prob * 100)
+
+        col1, col2, col3 = st.columns([3, 2, 1])
+        with col1:
+            if i == 0:
+                st.markdown(f"**{disease}**")
+            else:
+                st.markdown(disease)
+        with col2:
+            st.progress(prob)
+        with col3:
+            st.markdown(f"**{prob_pct}%**")
+
+    st.caption("💡 These are the top conditions based on the symptoms you selected.")
 
 # ── Why this was suggested ────────────────────────────────────────────────
 st.markdown("#### 🔎 Why this was suggested")
