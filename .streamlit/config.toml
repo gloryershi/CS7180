@@ -1,6 +1,3 @@
 [theme]
 base = "light"
 primaryColor = "#6FAF99"
-
-[client]
-toolbarMode = "minimal"

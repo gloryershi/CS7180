@@ -40,10 +40,6 @@ def inject_css():
             font-family: 'Inter', 'Segoe UI', sans-serif;
             color: {PALETTE['text']};
         }}
-        /* Hide Streamlit toolbar/menu so users cannot toggle system/dark theme */
-        [data-testid="stToolbar"], #MainMenu, [data-testid="stDecoration"] {{
-            display: none !important;
-        }}
         .main .block-container {{
             padding-top: 2rem;
             max-width: 860px;
