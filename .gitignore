@@ -18,7 +18,6 @@ secrets.toml
 .streamlit/secrets.toml
 
 # ── ML model files (add to git only intentionally) ────────────────────────
-*.joblib
 *.pkl
 *.pickle
 *.h5
