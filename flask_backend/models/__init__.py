@@ -650,6 +650,28 @@ def predict_cat(symptoms: list[str]) -> dict:
         return _cat_model_error(symptoms, str(exc))
 
 
+_LIVESTOCK_HIGH_URGENCY_KEYWORDS = frozenset({
+    "anthrax", "foot and mouth", "fmd", "rabies", "blackleg",
+    "hemorrhagic", "septicemia", "tetanus", "botulism",
+})
+_LIVESTOCK_CRITICAL_SYMPTOMS = frozenset({
+    "difficulty walking", "muscle tremors", "shortness of breath",
+    "swelling in neck", "chest discomfort",
+})
+
+
+def _livestock_urgency(condition: str, symptoms: list[str], confidence: float) -> str:
+    cond_lower = condition.lower()
+    if any(kw in cond_lower for kw in _LIVESTOCK_HIGH_URGENCY_KEYWORDS):
+        return "critical"
+    sym_lower = {s.strip().lower() for s in symptoms}
+    if sym_lower & _LIVESTOCK_CRITICAL_SYMPTOMS:
+        return "high"
+    if confidence < 0.4:
+        return "low"
+    return "medium"
+
+
 def predict_livestock(
     symptoms: list[str],
     animal_type: str = "cow",
@@ -666,12 +688,25 @@ def predict_livestock(
         if LIVESTOCK_LABEL_ENCODER is not None:
             condition = str(LIVESTOCK_LABEL_ENCODER.inverse_transform([pred])[0])
         else:
-            condition = str(pred)  
+            condition = str(pred)
 
         confidence = 0.0
+        top_predictions: list[dict] = []
+
         if hasattr(LIVESTOCK_CLASSIFIER, "predict_proba"):
             proba      = LIVESTOCK_CLASSIFIER.predict_proba(X)[0]
             confidence = float(np.max(proba))
+            classes    = LIVESTOCK_CLASSIFIER.classes_
+            sorted_idx = np.argsort(proba)[::-1]
+            for idx in sorted_idx[:5]:
+                if LIVESTOCK_LABEL_ENCODER is not None:
+                    label = str(LIVESTOCK_LABEL_ENCODER.inverse_transform([classes[idx]])[0])
+                else:
+                    label = str(classes[idx])
+                top_predictions.append({
+                    "condition":  label,
+                    "confidence": round(float(proba[idx]), 2),
+                })
         elif hasattr(LIVESTOCK_CLASSIFIER, "decision_function"):
             confidence = 0.75
 
@@ -679,7 +714,7 @@ def predict_livestock(
             "animal":     "livestock",
             "condition":  condition,
             "confidence": round(confidence, 2),
-            "urgency":    "medium",
+            "urgency":    _livestock_urgency(condition, symptoms, confidence),
             "why":        "Predicted from selected symptoms using the trained livestock GradientBoosting classifier.",
             "next_steps": [
                 "Consult a licensed veterinarian to confirm the diagnosis.",
@@ -690,6 +725,7 @@ def predict_livestock(
             "red_flags":  [],
             "model_version": "livestock_model.joblib",
             "is_placeholder": False,
+            "top_predictions": top_predictions,
         }
 
     except Exception as exc:

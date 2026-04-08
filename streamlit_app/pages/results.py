@@ -59,10 +59,10 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# ── Top predictions For cats(differential diagnosis) ─────────────────────────────
+# ── Top predictions For cats ─────────────────────────────
 top_predictions = result.get("top_predictions", [])
 if top_predictions and animal == "cat":
-    st.markdown("#### 🔬 All possible conditions (ranked by confidence)")
+    st.markdown("#### 📊 All possible conditions")
     st.markdown(
         '<div class="card">',
         unsafe_allow_html=True,
@@ -71,12 +71,11 @@ if top_predictions and animal == "cat":
     for i, pred in enumerate(top_predictions):
         p_conf = pred.get("confidence", 0.0)
         p_cond = pred.get("condition", "—")
-        rank_color = "#2E7D5E" if i == 0 else "#6B7280"
         bar_opacity = "1" if i == 0 else "0.55"
+        cond_style = "font-weight:700;" if i == 0 else ""
         rows_html += (
             f'<div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:0.6rem">'
-            f'  <span style="min-width:1.4rem;font-weight:700;color:{rank_color}">{i+1}.</span>'
-            f'  <span style="flex:2;font-size:0.95rem">{p_cond}</span>'
+            f'  <span style="flex:2;font-size:0.95rem;{cond_style}">{p_cond}</span>'
             f'  <div class="conf-bar-wrap" style="flex:3">'
             f'    <div class="conf-bar-fill" style="width:{int(p_conf*100)}%;opacity:{bar_opacity}"></div>'
             f'  </div>'
@@ -88,7 +87,7 @@ if top_predictions and animal == "cat":
 
 # ── Top predictions for dogs ──────────────────────────────────────────────
 if top_predictions and animal == "dog" and len(top_predictions) > 1:
-    st.markdown("#### 📊 Other possible conditions")
+    st.markdown("#### 📊 All possible conditions")
 
     for i, pred in enumerate(top_predictions):
         disease = pred.get("disease", "—").replace("_", " ").title()
@@ -107,6 +106,31 @@ if top_predictions and animal == "dog" and len(top_predictions) > 1:
             st.markdown(f"**{prob_pct}%**")
 
     st.caption("💡 These are the top conditions based on the symptoms you selected.")
+
+# ── Top predictions for livestock ────────────────────────────────────────
+if top_predictions and animal == "livestock":
+    st.markdown("#### 📊 All possible conditions")
+    st.markdown(
+        '<div class="card">',
+        unsafe_allow_html=True,
+    )
+    rows_html = ""
+    for i, pred in enumerate(top_predictions):
+        p_conf = pred.get("confidence", 0.0)
+        p_cond = pred.get("condition", "—")
+        bar_opacity = "1" if i == 0 else "0.55"
+        cond_style = "font-weight:700;" if i == 0 else ""
+        rows_html += (
+            f'<div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:0.6rem">'
+            f'  <span style="flex:2;font-size:0.95rem;{cond_style}">{p_cond}</span>'
+            f'  <div class="conf-bar-wrap" style="flex:3">'
+            f'    <div class="conf-bar-fill" style="width:{int(p_conf*100)}%;opacity:{bar_opacity}"></div>'
+            f'  </div>'
+            f'  <span style="min-width:3rem;text-align:right;font-weight:{"700" if i==0 else "400"};'
+            f'font-size:{"1rem" if i==0 else "0.9rem"}">{int(p_conf*100)}%</span>'
+            f'</div>'
+        )
+    st.markdown(rows_html + "</div>", unsafe_allow_html=True)
 
 # ── Why this was suggested ────────────────────────────────────────────────
 st.markdown("#### 🔎 Why this was suggested")
