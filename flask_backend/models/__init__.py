@@ -312,9 +312,19 @@ def _cat_model_result(symptoms: list[str]) -> dict:
     condition = _resolve_cat_condition(pred)
 
     confidence = 0.0
+    top_predictions: list[dict] = []
+
     if hasattr(CAT_CLASSIFIER, "predict_proba"):
         proba = CAT_CLASSIFIER.predict_proba(X)[0]
         confidence = float(np.max(proba))
+        classes = CAT_CLASSIFIER.classes_
+        sorted_idx = np.argsort(proba)[::-1]
+        for idx in sorted_idx[:5]:
+            label = _resolve_cat_condition(classes[idx])
+            top_predictions.append({
+                "condition": label,
+                "confidence": round(float(proba[idx]), 2),
+            })
     elif hasattr(CAT_CLASSIFIER, "decision_function"):
         confidence = 0.75
 
@@ -323,7 +333,7 @@ def _cat_model_result(symptoms: list[str]) -> dict:
         "condition": condition,
         "confidence": round(confidence, 2),
         "urgency": _cat_urgency(condition, symptoms, confidence),
-        "why": f"Predicted from your selected symptoms using the trained feline classifier (top class).",
+        "why": "Predicted from your selected symptoms using the trained feline classifier (top class).",
         "next_steps": [
             "Consult a licensed veterinarian to confirm any concern.",
             "Keep a record of symptom onset and progression.",
@@ -332,6 +342,7 @@ def _cat_model_result(symptoms: list[str]) -> dict:
         "red_flags": [],
         "model_version": "cat_model.joblib",
         "is_placeholder": False,
+        "top_predictions": top_predictions,
     }
 
 
