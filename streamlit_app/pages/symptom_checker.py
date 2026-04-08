@@ -117,7 +117,7 @@ main_symptom = st.selectbox(
 if st.button("Add main symptom", use_container_width=True, disabled=main_symptom is None):
     _add_symptom(main_symptom)
 
-st.markdown("#### Common symptoms")
+st.markdown("<h5 style='text-align:center'>Common symptoms</h5>", unsafe_allow_html=True)
 st.markdown("<p class='chip-note'>Quick-add options:</p>", unsafe_allow_html=True)
 common_symptoms = _common_symptoms_for(animal, all_symptoms)
 chip_cols = st.columns(3)
@@ -130,19 +130,6 @@ for i, sym in enumerate(common_symptoms):
             disabled=sym in st.session_state.symptoms,
         ):
             _add_symptom(sym)
-
-st.markdown("#### Add another symptom (optional)")
-extra_picker_key = f"extra_symptom_pick_{animal}"
-extra_symptom = st.selectbox(
-    "Add another symptom",
-    options=all_symptoms,
-    index=None,
-    placeholder="Choose a symptom...",
-    label_visibility="collapsed",
-    key=extra_picker_key,
-)
-if st.button("Add selected symptom", use_container_width=True, disabled=extra_symptom is None):
-    _add_symptom(extra_symptom)
 
 st.markdown("### 2) Review selected symptoms")
 selected = st.multiselect(
