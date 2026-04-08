@@ -3,8 +3,8 @@
 import streamlit as st
 
 PALETTE = {
-    "primary":    "#2E7D5E",   # deep green
-    "secondary":  "#52B788",   # mid green
+    "primary":    "#6FAF99",   # softened sage green
+    "secondary":  "#93C9B7",   # light mint green
     "accent":     "#F4A261",   # warm orange
     "critical":   "#E63946",
     "high":       "#F4A261",
@@ -47,13 +47,46 @@ def inject_css():
 
         /* ── Sidebar ── */
         section[data-testid="stSidebar"] {{
-            background: {PALETTE['primary']};
+            background: linear-gradient(180deg, #EAF6F1 0%, #F4FBF8 100%);
+            border-right: 1px solid #D9EEE6;
         }}
         section[data-testid="stSidebar"] * {{
-            color: #fff !important;
+            color: #2D4E43 !important;
         }}
-        section[data-testid="stSidebar"] .stRadio label {{
-            color: #fff !important;
+        section[data-testid="stSidebar"] [data-testid="stSidebarNav"] {{
+            padding-top: 0.4rem;
+        }}
+        section[data-testid="stSidebar"] [data-testid="stSidebarNav"] a {{
+            border-radius: 10px;
+            margin-bottom: 0.25rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding-top: 0.35rem;
+            padding-bottom: 0.35rem;
+        }}
+        section[data-testid="stSidebar"] [data-testid="stSidebarNav"] a:hover {{
+            background: #E2F2EC;
+        }}
+        section[data-testid="stSidebar"] [data-testid="stSidebarNav"] a[aria-current="page"] {{
+            background: #D2EBE2;
+        }}
+        .sidebar-card {{
+            background: #FFFFFF;
+            border: 1px solid #DDEEE8;
+            border-radius: 12px;
+            padding: 0.7rem 0.85rem;
+            margin: 0.55rem 0;
+        }}
+        .sidebar-title {{
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #2D4E43;
+            margin: 0;
+        }}
+        .sidebar-subtitle {{
+            font-size: 0.8rem;
+            color: #5D7E73;
+            margin: 0.15rem 0 0;
         }}
 
         /* ── Page header banner ── */
