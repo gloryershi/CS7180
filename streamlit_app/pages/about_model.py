@@ -59,36 +59,3 @@ for animal, meta in metadata.items():
             </div>""",
         unsafe_allow_html=True,
     )
-
-st.markdown("---")
-st.markdown(
-    """<div class="card">
-         <h3>🔄 How to load your real models</h3>
-         <p style="margin:0.4rem 0 0.8rem;color:#6B7280;font-size:0.9rem">
-           Replace the placeholder logic in <code>flask_backend/models/__init__.py</code>
-           with your trained <code>.joblib</code> files:
-         </p>
-       </div>""",
-    unsafe_allow_html=True,
-)
-
-st.code(
-    """\
-import joblib
-
-_dog_model = joblib.load("flask_backend/models/dog_model.joblib")
-
-def predict_dog(symptoms: list[str]) -> dict:
-    features = vectorize(symptoms)           # your own vectoriser
-    label    = _dog_model.predict([features])[0]
-    prob     = _dog_model.predict_proba([features])[0].max()
-    return {
-        "animal":     "dog",
-        "condition":  label,
-        "confidence": round(float(prob), 2),
-        "urgency":    map_urgency(label),    # your own mapping
-        ...
-    }
-""",
-    language="python",
-)

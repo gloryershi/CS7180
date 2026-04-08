@@ -119,14 +119,14 @@ st.markdown(
 )
 main_picker_key = f"main_symptom_pick_{animal}"
 main_symptom = st.selectbox(
-    "Choose main symptom",
+    "Choose main symptoms",
     options=all_symptoms,
     index=None,
     placeholder="Choose a symptom...",
     label_visibility="collapsed",
     key=main_picker_key,
 )
-if st.button("Add main symptom", use_container_width=True, disabled=main_symptom is None):
+if st.button("Add main symptoms", use_container_width=True, disabled=main_symptom is None):
     _add_symptom(main_symptom)
 
 st.markdown("<h5 style='text-align:center'>Common symptoms</h5>", unsafe_allow_html=True)
