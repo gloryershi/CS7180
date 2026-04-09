@@ -2,19 +2,14 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system dependencies (if you add any compiled libs, update this)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy dependency list and install
+# Install Python dependencies separately for better layer caching
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
+# Copy the rest of the application source
 COPY . .
 
-# Streamlit configuration for running inside Docker
+# Runtime configuration for Streamlit + Flask inside the container
 ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     STREAMLIT_SERVER_PORT=8501 \
@@ -25,11 +20,8 @@ ENV PYTHONUNBUFFERED=1 \
     FLASK_RUN_HOST=0.0.0.0 \
     FLASK_RUN_PORT=5001
 
-# Expose both the Streamlit and Flask ports
 EXPOSE 8501 5001
 
-# By default, run the Streamlit app.
-# You can override this at runtime to run the Flask backend instead, e.g.:
-#   docker run ... ml_symptom_checker flask --app flask_backend/app.py run
+# Default to Streamlit; override CMD at runtime to run Flask only
 CMD ["streamlit", "run", "streamlit_app/app.py"]
 
