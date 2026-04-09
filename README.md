@@ -10,7 +10,7 @@ Currently uses **placeholder models**; swap in real `.joblib` files when ready.
 ```
 ML_SymptomChecker/
 ├── flask_backend/
-│   ├── app.py                  # Flask API (port 5001)
+│   ├── app.py                  # Flask API (port 5001) --> we use 5001 to avoid conflicts
 │   └── models/
 │       └── __init__.py         # Placeholder predict_dog / predict_cat / predict_livestock
 │
