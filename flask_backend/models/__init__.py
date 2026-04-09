@@ -475,7 +475,9 @@ def _cat_model_result(symptoms: list[str]) -> dict:
         confidence = float(np.max(proba))
         classes = CAT_CLASSIFIER.classes_
         sorted_idx = np.argsort(proba)[::-1]
-        for idx in sorted_idx[:5]:
+        for idx in sorted_idx:
+            if float(proba[idx]) <= 0.05:
+                continue
             label = _resolve_cat_condition(classes[idx])
             top_predictions.append({
                 "condition": label,
@@ -590,7 +592,7 @@ def predict_dog(symptoms: list[str]) -> dict:
                 "probability": round(float(probabilities[i]), 4),
             }
             for i in top_indices
-            if probabilities[i] > 0.01
+            if probabilities[i] > 0.05
         ]
 
         disease_info = _DOG_DISEASE_INFO.get(prediction, {})
@@ -683,7 +685,9 @@ def predict_livestock(
             confidence = float(np.max(proba))
             classes    = LIVESTOCK_CLASSIFIER.classes_
             sorted_idx = np.argsort(proba)[::-1]
-            for idx in sorted_idx[:5]:
+            for idx in sorted_idx:
+                if float(proba[idx]) <= 0.05:
+                    continue
                 if LIVESTOCK_LABEL_ENCODER is not None:
                     label = str(LIVESTOCK_LABEL_ENCODER.inverse_transform([classes[idx]])[0])
                 else:
