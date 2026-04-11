@@ -221,8 +221,8 @@ SYMPTOMS = {
         "bloody discharge", "wounds",
     ],
     "cat": [
-        "Appetite_Loss", "Vomiting", "Diarrhea", "Coughing", "Labored_Breathing",
-        "Lameness", "Skin_Lesions", "Nasal_Discharge","Eye_Discharge",
+        "Appetite Loss", "Vomiting", "Diarrhea", "Coughing", "Labored Breathing",
+        "Lameness", "Skin Lesions", "Nasal Discharge","Eye Discharge",
     ],
     "livestock": [
         "Blisters On Gums", "Blisters On Hooves", "Blisters On Mouth",
