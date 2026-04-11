@@ -47,7 +47,7 @@ def predict():
     body = request.get_json(silent=True) or {}
     animal = (body.get("animal") or "").lower().strip()
     symptoms = body.get("symptoms") or []
-
+    print("DEBUG symptoms received:", symptoms) 
     # --- validation ---
     if animal not in _PREDICTORS:
         return jsonify({"error": "Field 'animal' must be 'dog', 'cat', or 'livestock'."}), 400

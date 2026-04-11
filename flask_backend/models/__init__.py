@@ -658,7 +658,6 @@ def _livestock_urgency(condition: str, symptoms: list[str], confidence: float) -
         return "low"
     return "medium"
 
-
 def predict_livestock(
     symptoms: list[str],
     animal_type: str = "cow",
@@ -677,64 +676,64 @@ def predict_livestock(
         else:
             condition = str(pred)
 
-        confidence = 0.0
-        top_predictions: list[dict] = []
-
+        all_probs = {}
         if hasattr(LIVESTOCK_CLASSIFIER, "predict_proba"):
-            proba      = LIVESTOCK_CLASSIFIER.predict_proba(X)[0]
-            confidence = float(np.max(proba))
-            classes    = LIVESTOCK_CLASSIFIER.classes_
-            sorted_idx = np.argsort(proba)[::-1]
-            for idx in sorted_idx:
-                if float(proba[idx]) <= 0.05:
-                    continue
+            proba = LIVESTOCK_CLASSIFIER.predict_proba(X)[0]
+            classes = LIVESTOCK_CLASSIFIER.classes_
+            for cls_idx, prob in zip(classes, proba):
                 if LIVESTOCK_LABEL_ENCODER is not None:
-                    label = str(LIVESTOCK_LABEL_ENCODER.inverse_transform([classes[idx]])[0])
+                    cls_name = str(LIVESTOCK_LABEL_ENCODER.inverse_transform([cls_idx])[0])
                 else:
-                    label = str(classes[idx])
-                top_predictions.append({
-                    "condition":  label,
-                    "confidence": round(float(proba[idx]), 2),
-                })
-        elif hasattr(LIVESTOCK_CLASSIFIER, "decision_function"):
-            confidence = 0.75
+                    cls_name = str(cls_idx)
+                all_probs[cls_name] = round(float(prob), 4)
+
+        confidence = all_probs.get(condition, 0.0)
+
+        top4 = dict(
+            sorted(all_probs.items(), key=lambda x: x[1], reverse=True)[:4]
+        )
+
+        top_predictions = [
+            {"condition": name, "confidence": prob}
+            for name, prob in sorted(all_probs.items(), key=lambda x: x[1], reverse=True)[:4]
+        ]
 
         return {
-            "animal":     "livestock",
-            "condition":  condition,
-            "confidence": round(confidence, 2),
-            "urgency":    _livestock_urgency(condition, symptoms, confidence),
-            "why":        "Predicted from selected symptoms using the trained livestock GradientBoosting classifier.",
+            "animal":          "livestock",
+            "condition":       condition,
+            "confidence":      confidence,
+            "all_probs":       all_probs,
+            "top4":            top4,
+            "top_predictions": top_predictions,  
+            "urgency":       "medium",
+            "why":           "Predicted from selected symptoms using the trained livestock GradientBoosting classifier.",
             "next_steps": [
                 "Consult a licensed veterinarian to confirm the diagnosis.",
                 "Isolate the animal if an infectious disease is suspected.",
                 "Record symptom onset, duration, and any recent environmental changes.",
             ],
             "matched_symptoms": symptoms,
-            "red_flags":  [],
+            "red_flags":     [],
             "model_version": "livestock_model.joblib",
             "is_placeholder": False,
-            "top_predictions": top_predictions,
         }
 
     except Exception as exc:
         return {
-            "animal":     "livestock",
-            "condition":  "Prediction unavailable",
-            "confidence": 0.0,
-            "urgency":    "medium",
-            "why":        f"Model error: {exc}",
+            "animal":        "livestock",
+            "condition":     "Prediction unavailable",
+            "confidence":    0.0,
+            "urgency":       "medium",
+            "why":           f"Model error: {exc}",
             "next_steps": [
-                "Ensure `livestock_model.joblib` and `livestock_label_encoder.joblib` "
-                "are present and match training columns.",
+                "Ensure livestock_model.joblib and livestock_label_encoder.joblib are present.",
                 "Consult a licensed veterinarian for a proper diagnosis.",
             ],
             "matched_symptoms": symptoms,
-            "red_flags":  [],
+            "red_flags":     [],
             "model_version": "error",
             "is_placeholder": True,
         }
-
 
 
 # ---------------------------------------------------------------------------
