@@ -2,7 +2,7 @@
 
 import requests
 
-BASE_URL = "http://localhost:5001/api"
+BASE_URL = "https://cs7180.onrender.com/api"
 TIMEOUT = 10
 
 
